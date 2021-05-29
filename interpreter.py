@@ -1,31 +1,16 @@
-import sys,random
-s=sys.stdin.read()
-i=input('Input: ')
-if i.isdigit():
-  acc=int(i)
-else:
-  acc=0
-EOF='EOF'
-direction='right'
-X=1
-Y=1
-n=0
-lines=s.split("\n")
-wall=[[EOF]*len(lines[0])]
-box=wall+[[EOF]+[*x]+[EOF]for x in lines]+wall
-times=1
-execute=True
-codepage='iodcswh<>^v!~(){}'
-directions={'<':'left','>':'right','^':'up','v':'down'}
-token=box[X][Y]
+import random
+
+EOF = 'EOF'
+codepage = 'iodcswh<>^v!~(){}'
+directions = {'<':'left','>':'right','^':'up','v':'down'}
 commands={
 'i':"acc+=1",
-'o':"print(acc,end='')",
+'o':"stdout['out'] += str(acc)",
 'd':"acc-=1",
-'c':"print(chr(acc),end='')",
+'c':"stdout['out'] += chr(acc)",
 's':"acc**=2",
-'w':"print('Hello, World!',end='')",
-'h':"sys.exit()",
+'w':"stdout['out'] += 'Hello, World!'",
+'h':"exit(1)",
 '<':"direction='left'",
 '>':"direction='right'",
 '^':"direction='up'",
@@ -37,15 +22,37 @@ commands={
 ')':"execute=True",
 '!':"Y=random.choice(range(len(box[X])))"
 }
-while token!=EOF:
+def execute(code, stdin, stdout):
+  lines = code.replace("\r", "").split("\n") # Because I don't remember how PA does newlines
+  i = stdin
+  i=input('Input: ')
+  stdout["out"] = ""
+  if i.isdigit():
+    acc=int(i)
+  else:
+    acc=0
+
+  direction='right'
+  X=1
+  Y=1
+  n=0
+  lines=s.split("\n")
+  wall=[[EOF]*len(lines[0])]
+  box=wall+[[EOF]+[*x]+[EOF]for x in lines]+wall
+  times=1
+  execute=True
+
   token=box[X][Y]
-  if token==')':execute=True
-  if (token in codepage) and execute and (token not in '{}()'):
-    for _ in range(times):
+
+  while token!=EOF:
+    token=box[X][Y]
+    if token==')':execute=True
+    if (token in codepage) and execute and (token not in '{}()'):
+      for _ in range(times):
+        exec(commands[token])
+    if token in '{}()':
       exec(commands[token])
-  if token in '{}()':
-    exec(commands[token])
-  if direction=='right':Y+=1
-  if direction=='left':Y-=1
-  if direction=='up':X-=1
-  if direction=='down':X+=1
+    if direction=='right':Y+=1
+    if direction=='left':Y-=1
+    if direction=='up':X-=1
+    if direction=='down':X+=1
